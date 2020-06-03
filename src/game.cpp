@@ -1,5 +1,4 @@
 #include "game.h"
-#include <iostream>
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
@@ -9,6 +8,7 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
       random_h(0, static_cast<int>(grid_height) - 1)
 {
   PlaceFood();
+  food.Simulate();
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -66,8 +66,11 @@ void Game::PlaceFood()
     // food.
     if (!snake.SnakeCell(x, y))
     {
+      std::lock_guard<std::mutex> lck(mMutex);
       food.SetX(x);
       food.SetY(y);
+      food.SetState(EFoodState::Fresh);
+      food.SetTimeNow();
       return;
     }
   }
@@ -84,9 +87,18 @@ void Game::Update()
   int new_y = static_cast<int>(snake.head_y);
 
   // Check if there's food over here
+  std::unique_lock<std::mutex> uLock(mMutex);
   if (food.GetX() == new_x && food.GetY() == new_y)
   {
-    score++;
+    if (food.GetState() == EFoodState::Fresh)
+    {
+      uLock.unlock();
+      score++;
+    }
+    else
+    {
+      score--;
+    }
     PlaceFood();
     // Grow snake and increase speed.
     snake.GrowBody();

@@ -1,7 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <mutex>
 #include <random>
+
 #include "SDL.h"
 #include "controller.h"
 #include "Food.h"
@@ -20,6 +22,7 @@ public:
 private:
   Snake snake;
   Food food;
+  std::mutex mMutex;
 
   std::random_device dev;
   std::mt19937 engine;
