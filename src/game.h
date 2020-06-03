@@ -4,6 +4,7 @@
 #include <random>
 #include "SDL.h"
 #include "controller.h"
+#include "Food.h"
 #include "renderer.h"
 #include "snake.h"
 
@@ -18,7 +19,7 @@ public:
 
 private:
   Snake snake;
-  SDL_Point food;
+  Food food;
 
   std::random_device dev;
   std::mt19937 engine;
